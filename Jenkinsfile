@@ -12,7 +12,10 @@ pipeline {
         string(name: 'sonar_token', defaultValue: 'aca9fee4aae893fa63b46476fb1938ddaac62ed9', description: 'The token from Sonarqube')
         string(name: 'sonar_srv', defaultValue: 'http://172.30.68.55:9000', description: 'The Sonarqube server')
 <<<<<<< HEAD
+<<<<<<< HEAD
         string(name: 'art_repo', defaultValue: 'docker-virtual.artifactory', description: 'Artifactory docker registry')
+=======
+>>>>>>> parent of f762351 (Update Jenkinsfile)
 =======
 >>>>>>> parent of f762351 (Update Jenkinsfile)
 
