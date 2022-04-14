@@ -11,7 +11,7 @@ pipeline {
         string(name: 'container_name', defaultValue: 'my_maven_app', description: 'Name of the container')
         string(name: 'sonar_token', defaultValue: 'aca9fee4aae893fa63b46476fb1938ddaac62ed9', description: 'The token from Sonarqube')
         string(name: 'sonar_srv', defaultValue: 'http://172.30.68.55:9000', description: 'The Sonarqube server')
-        string(name: 'art_repo', defaultValue: '${params.art_repo}', description: 'Artifactory docker registry')
+        string(name: 'art_repo', defaultValue: 'docker-virtual.artifactory', description: 'Artifactory docker registry')
 
     }
 
@@ -51,6 +51,7 @@ pipeline {
             steps {
                 withSonarQubeEnv('SonarQube') {
                     // Sonarqube check
+                    sh "java -version"
                     sh "mvn -f app/ sonar:sonar -Dsonar.host.url=${params.sonar_srv} -Dsonar.login=${params.sonar_token}"
                 }
             }
