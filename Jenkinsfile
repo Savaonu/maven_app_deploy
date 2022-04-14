@@ -11,6 +11,7 @@ pipeline {
         string(name: 'container_name', defaultValue: 'my_maven_app', description: 'Name of the container')
         string(name: 'sonar_token', defaultValue: 'aca9fee4aae893fa63b46476fb1938ddaac62ed9', description: 'The token from Sonarqube')
         string(name: 'sonar_srv', defaultValue: 'http://172.30.68.55:9000', description: 'The Sonarqube server')
+        string(name: 'art_repo', defaultValue: '${params.art_repo}', description: 'Artifactory docker registry')
 
     }
 
@@ -43,7 +44,7 @@ pipeline {
             }
             steps {
                 // Build Image
-                sh "docker build -t ${params.image_name}:${env.BUILD_NUMBER} . --label \"type=maven_image\""
+                sh "docker build -t ${params.art_repo}/${params.image_name}:${env.BUILD_NUMBER} . --label \"type=${params.image_name}\""
             }
         }
         stage('SonarQube analysis') {
@@ -67,9 +68,8 @@ pipeline {
             steps {
                 // Push to Dockerhub repo
                // withCredentials([usernamePassword(credentialsId: 'Artifactory_admin', passwordVariable: 'repo_passw', usernameVariable: 'repo_username')]) {
-                    sh "echo \"${ARTIFACTORY_CRED_PSW}\" | docker login -u \"${ARTIFACTORY_CRED_USR}\" docker-virtual.artifactory --password-stdin"
-                    sh "docker tag ${params.image_name}:${env.BUILD_NUMBER} docker-virtual.artifactory/${params.image_name}:${env.BUILD_NUMBER}"
-                    sh "docker push docker-virtual.artifactory/${params.image_name}:${env.BUILD_NUMBER}"
+                    sh "echo \"${ARTIFACTORY_CRED_PSW}\" | docker login -u \"${ARTIFACTORY_CRED_USR}\" ${params.art_repo} --password-stdin"
+                    sh "docker push ${params.art_repo}/${params.image_name}:${env.BUILD_NUMBER}"
                 //}
             }
         }
@@ -79,7 +79,7 @@ pipeline {
             }
                     steps {
                         // Delete the image pushed to Artifactory
-                        sh "docker rmi --force docker-virtual.artifactory/${params.image_name}:${env.BUILD_NUMBER}"
+                        sh "docker rmi --force ${params.art_repo}/${params.image_name}:${env.BUILD_NUMBER}"
                         sh "docker rmi --force ${params.image_name}:${env.BUILD_NUMBER}"
                     }
                 }
@@ -93,11 +93,11 @@ pipeline {
 
                 // Push to Artifactory docker registry
                 //withCredentials([usernamePassword(credentialsId: 'ae4a797f-6a03-4dc7-874f-c6683cc2fcba', passwordVariable: 'repo_passw', usernameVariable: 'repo_username')]) {
-                    sh "echo \"${ARTIFACTORY_CRED_PSW}\" | docker login -u \"${ARTIFACTORY_CRED_USR}\" docker-virtual.artifactory --password-stdin"
+                    sh "echo \"${ARTIFACTORY_CRED_PSW}\" | docker login -u \"${ARTIFACTORY_CRED_USR}\" ${params.art_repo} --password-stdin"
                    // sh "docker tag $image_name savaonu/$image_name"
-                    sh "docker pull docker-virtual.artifactory/${params.image_name}:${env.BUILD_NUMBER}"
+                    sh "docker pull ${params.art_repo}/${params.image_name}:${env.BUILD_NUMBER}"
                      // Create container
-                    sh "docker run -p 8089:8080 -d --name ${params.container_name} docker-virtual.artifactory/${params.image_name}:${env.BUILD_NUMBER}"
+                    sh "docker run -p 8089:8080 -d --name ${params.container_name} ${params.art_repo}/${params.image_name}:${env.BUILD_NUMBER}"
                 //}
             }
         }
