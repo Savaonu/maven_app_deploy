@@ -50,7 +50,7 @@ pipeline {
             steps {
                 withSonarQubeEnv('SonarQube') {
                     // Sonarqube check
-                    sh "which java && java -version"
+                    sh "which java && java -version && id"
                     sh "mvn -f app/ sonar:sonar -Dsonar.host.url=${params.sonar_srv} -Dsonar.login=${params.sonar_token}"
                 }
             }
